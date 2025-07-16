@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Earth Patch Notes</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    background: #f0f0f0;
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  h2, h3 {
+    text-align: center;
+    margin: 1rem 0 0.5rem;
+  }
+
+  #entries {
+    width: 100%;
+    max-width: 800px;
+  }
+
+    .entry {
+    background: #fff;
+    border-left: 4px solid #2196F3;
+    padding: 0.4rem 0.6rem;
+    margin: 0.3rem auto;
+    max-width: 600px;
+    font-size: 0.85rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border-radius: 4px;
+    line-height: 1.3;
+    }
+
+    .entry.buff { border-left-color: #4caf50; }
+    .entry.nerf { border-left-color: #f44336; }
+
+    .meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #555;
+    margin: 0;
+    }
+
+    .type, .date, .reason, .entry em {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    }
+
+    .alias {
+        float: right
+    }
+
+    .entry p {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    }
+
+
+  .loading {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 600px) {
+    .entry {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .meta {
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <h1>🌍 Earth Patch Notes</h1>
+  <div id="entries">
+    <p class="loading">Loading submissions...</p>
+  </div>
+
+    <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbz8LqUB5dQCnwVf4tJ5HlM_I2D_2TgY5loiRSkR5FWSaVqiFnueadAy6HFbH15VA-br/exec";
+
+    fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+        const container = document.getElementById("entries");
+        container.innerHTML = "";
+
+        // Group entries by target
+        const grouped = {};
+        data.forEach(entry => {
+            const target = entry["What is the buff/nerf for?"] || "Unspecified";
+            const type = (entry["Is a buff or a nerf"] || "").toLowerCase();
+
+            if (!grouped[target]) grouped[target] = { buff: [], nerf: [], other: [] };
+
+            if (type === "buff" || type === "nerf") {
+            grouped[target][type].push(entry);
+            } else {
+            grouped[target]["other"].push(entry);
+            }
+        });
+
+        const targets = Object.keys(grouped).sort();
+
+        targets.forEach(target => {
+            const section = document.createElement("div");
+            const header = document.createElement("h2");
+            header.textContent = target;
+            section.appendChild(header);
+
+            ["buff", "nerf", "other"].forEach(type => {
+            if (grouped[target][type].length === 0) return;
+
+            const subhead = document.createElement("h3");
+            subhead.textContent = type.charAt(0).toUpperCase() + type.slice(1) + "s";
+            subhead.style.marginLeft = "0.5rem";
+            subhead.style.color = type === "buff" ? "#4caf50" :
+                                    type === "nerf" ? "#f44336" : "#555";
+            section.appendChild(subhead);
+
+            grouped[target][type]
+                .sort((a, b) => new Date(b["Timestamp"]) - new Date(a["Timestamp"]))
+                .forEach(entry => {
+                const reason = entry["What is the buff/nerf?"] || "";
+                const alias = entry["Your name to display"] || "Anonymous";
+                const date = entry["Timestamp"] ? new Date(entry["Timestamp"]).toLocaleString() : "";
+
+                const div = document.createElement("div");
+                div.className = `entry ${type}`;
+
+                div.innerHTML = `
+                    <div class="meta">
+                    <span class="type">${type}</span>
+                    <span class="date">${date}</span>
+                    </div>
+                    <p class="reason">${reason}</p>
+                    <p class="alias"><em>— ${alias}</em></p>
+                `;
+
+                section.appendChild(div);
+                });
+            });
+
+            container.appendChild(section);
+        });
+        })
+        .catch(err => {
+        document.getElementById("entries").innerHTML =
+            "<p class='loading'>Failed to load submissions.</p>";
+        console.error(err);
+        });
+    </script>
+
+</body>
+</html>
