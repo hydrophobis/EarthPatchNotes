@@ -5,15 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Earth Patch Notes</title>
 <style>
-  body {
+  html, body {
     font-family: system-ui, sans-serif;
-    background: #f0f0f0;
+    height: 100%;
     margin: 0;
-    padding: 1rem;
+    padding: 0;
+    }
+
+    body {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 60px; /* space for fixed footer */
     align-items: center;
-  }
+    }
+
+    #entries {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 800px;
+    }
+
+    /* Fixed footer styles */
+    footer {
+    /*position: fixed;*/
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #fafafa;
+    border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #555;
+    z-index: 1000;
+    }
+    footer a {
+    color: #2196F3;
+    text-decoration: none;
+    }
+
 
   h1 {
     text-align: center;
@@ -123,7 +157,8 @@
         const targets = Object.keys(grouped).sort();
 
         targets.forEach(target => {
-            const section = document.createElement("div");
+            const section = document.createElement("section");
+            section.id = target.replace(/\s+/g, ''); // Remove spaces
             const header = document.createElement("h2");
             header.textContent = target;
             section.appendChild(header);
@@ -170,6 +205,14 @@
         console.error(err);
         });
     </script>
+
+
+    <footer style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1rem; font-size: 0.85rem; color: #555; width: 100%; max-width: 800px;">
+    <a href="https://forms.gle/w2aRF4B3w5Xaj1RYA" target="_blank" rel="noopener" style="color:#2196F3; text-decoration:none;">
+        <h2>Submit a Buff/Nerf</h2>
+    </a>
+    </footer>
+
 
 </body>
 </html>
